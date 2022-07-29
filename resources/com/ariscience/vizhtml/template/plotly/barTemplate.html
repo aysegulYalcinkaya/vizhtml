@@ -1,0 +1,34 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+<script>
+  var xArray = $DATAX$;
+  var yArray = $DATAY$;
+  var txtArray = $INFO$;
+
+  var data = [{
+    x:xArray,
+    y:yArray,
+    text:txtArray,
+    type:"bar",
+    hovertemplate: "%{x}: %{y}<br>%{text}<extra></extra>",
+    orientation:"$TYPE$",
+    marker: {color:"rgba(255,0,0,0.6)"}
+  }];
+
+  var layout = {
+    xaxis: {title: "$TITLE_X$"},
+    yaxis: {title: "$TITLE_Y$"},
+    title:"$TITLE_CHART$",
+    width: $WIDTH$,
+    height: $HEIGHT$
+  };
+
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

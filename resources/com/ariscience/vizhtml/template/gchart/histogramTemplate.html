@@ -1,0 +1,34 @@
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load("current", {packages:["corechart"]});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['$TITLE_X$', '$TITLE_Y$'],
+        $DATA$]);
+
+      var options = {
+        title: '$TITLE_CHART$',
+        hAxis: {
+          title: '$TITLE_X$',
+        },
+        vAxis: {
+          title: '$TITLE_Y$',
+        },
+        width: $WIDTH$,
+        height: $HEIGHT$,
+        legend: { position: 'none' },
+      };
+
+      var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
+</head>
+<body>
+<div id="chart_div" style="width: $WIDTH$px; height: $HEIGHT$px;"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+</body>
+</html>

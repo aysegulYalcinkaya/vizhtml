@@ -1,0 +1,36 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<body>
+
+<div id="myDiv"></div>
+<footer align="center" style="width: 900px;"><sub>Footnote-1</sub></footer>
+<script>
+    var x=[['50','60','70','80','90','100','110','120','130','140','150'],['25','41','13','88','98','152','12','10','58','65','48']];
+    var series=['Series Label 1','Series Label 2']
+    var info = [['','','','','','','','','',''],['','','','','','','','','','']]
+
+    var data=[];
+    for (i=0;i<x.length;i++){
+        data.push( {
+            x: x[i],
+            type: "histogram",
+            name : "'"+series[i]+"'",
+            text : info[i],
+            hovertemplate : "%{y}<br>%{text}"
+        });
+    }
+
+    var layout = {
+        barmode: "stack",
+        xaxis: {title: "X"},
+        yaxis: {title: "Y"},
+        title:"Chart",
+        width: 900,
+        height: 500
+    };
+    Plotly.newPlot('myDiv', data, layout);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['bar']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Y','Tokyo','New York','Berlin'],
+        ['Jan',7.0,-0.2,-0.9],['Feb',6.9,0.8,0.6],['Mar',9.5,5.7,3.5]
+      ]);
+
+      var options = {
+        chart: {
+          title: 'Chart',
+          subtitle: '',
+        },
+        hAxis: {
+         title: 'X'
+        },
+        vAxis: {
+         title: 'Y'
+        },
+        bars: 'horizontal' // Required for Material Bar Charts.
+      };
+
+      var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+
+      chart.draw(data, google.charts.Bar.convertOptions(options));
+    }
+  </script>
+</head>
+<body>
+<div id="barchart_material" style="width: 900px; height: 500px;"></div>
+<footer align="center" style="width: 900px;"><sub>Graph 1</sub></footer>
+</body>
+</html>

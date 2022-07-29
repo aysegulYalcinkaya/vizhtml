@@ -1,0 +1,36 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<body>
+
+<div id="myDiv"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+<script>
+    var x=$DATAX$;
+    var series=$SERIES$
+    var info = $INFO$
+
+    var data=[];
+    for (i=0;i<x.length;i++){
+        data.push( {
+            x: x[i],
+            type: "histogram",
+            name : "'"+series[i]+"'",
+            text : info[i],
+            hovertemplate : "%{y}<br>%{text}"
+        });
+    }
+
+    var layout = {
+        barmode: "stack",
+        xaxis: {title: "$TITLE_X$"},
+        yaxis: {title: "$TITLE_Y$"},
+        title:"$TITLE_CHART$",
+        width: $WIDTH$,
+        height: $HEIGHT$
+    };
+    Plotly.newPlot('myDiv', data, layout);
+
+</script>
+
+</body>
+</html>

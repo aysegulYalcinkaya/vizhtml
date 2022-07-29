@@ -1,0 +1,28 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: 900px;"><sub>Footnote-1</sub></footer>
+<script>
+  var xArray = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  var yArray = ['Morning','Afternoon','Evening'];
+  var zArray = [[1,null,30,50,1],[20,1,60,80,30],[30,60,1,-10,20]];
+  var txtArray = [['Heat Info-1','Heat Info-2','Heat Info-3','Heat Info-4','Heat Info-5'],['Heat Info-6','Heat Info-7','Heat Info-8','Heat Info-9','Heat Info-10'],['Heat Info-11','Heat Info-12','Heat Info-13','Heat Info-14','Heat Info-15']];
+  var layout = {title:'Chart',
+    width:900,
+    height:500};
+
+  var data = [{
+      z:zArray,
+      x:xArray,
+      y:yArray,
+      text:txtArray,
+      hovertemplate:"X: %{x} Y: %{y} Z: %{z}<br>%{text}<extra></extra>",
+      type:"heatmap"}];
+
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

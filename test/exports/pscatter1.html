@@ -1,0 +1,35 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: 900px;"><sub>Footnote-1</sub></footer>
+<script>
+  var xArray = [50,60,70,80,90,100,110,120,130,140,150];
+  var yArray = [7,8,8,9,9,9,10,11,14,14,15];
+  var txtArray = ['','','','','','','','','','',''];
+
+  // Define Data
+  var data = [{
+    x: xArray,
+    y: yArray,
+    text: txtArray,
+    hovertemplate: "%{y}<br>%{text}<extra></extra>",
+    mode:"markers"    // lines for Line Chart markers for Scatter Chart
+  }];
+
+  // Define Layout
+  var layout = {
+    xaxis: {title: "X"},
+    yaxis: {title: "Y"},
+    title: "Chart",
+    width: 900,
+    height: 500
+  };
+
+  // Display using Plotly
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

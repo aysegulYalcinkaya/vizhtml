@@ -1,0 +1,36 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+<script>
+  var xArray = $DATAX$;
+  var yArray = $DATAY$;
+  var zArray = $DATAZ$;
+  var txtArray = $INFO$;
+
+  var data = [{
+    x:xArray,
+    y:yArray,
+    mode:"markers",
+    text: txtArray,
+    hovertemplate: "X: %{x} Y: %{y} Z: %{marker.size}<br>%{text}<extra></extra>",
+    marker: {size:zArray,
+             sizeref: 2.0 * Math.max(...zArray)/(80**2),
+             sizemode: 'area'}
+  }];
+
+  var layout = {
+    xaxis: {title: "$TITLE_X$"},
+    yaxis: {title: "$TITLE_Y$"},
+    title:"$TITLE_CHART$",
+    width: $WIDTH$,
+    height: $HEIGHT$
+  };
+
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

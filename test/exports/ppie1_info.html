@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: 900px;"><sub>Footnote-1</sub></footer>
+<script>
+  var xArray = ['Italy','France','Spain','USA','Argentina'];
+  var yArray = [55, 49.22, 44.0, 24, 15];
+  var txtArray = ['Pie Info-1','Pie Info-2','Pie Info-3','Pie Info-4','Pie Info-5'];
+  var layout = {title:'Chart',
+                width:900,
+                height:500};
+
+  var data = [{
+      labels:xArray,
+      values:yArray,
+      text: txtArray,
+      hovertemplate: "%{label} : %{value} (%{percent}) <br>%{text}<extra></extra>",
+      textinfo : 'percent',
+      type:"pie"}];
+
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

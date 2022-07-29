@@ -1,0 +1,279 @@
+<?xml version="1.0"?>
+
+<project name="Regression Tests" default="default" basedir=".">
+
+    <description>Tests - Automated tests for ARI VizHTML library</description>
+
+    <!-- which java version to depend on -->
+    <property name="java-source-version" value="1.8" />
+    <property name="java-target-version" value="1.8" />
+
+    <!-- set properties for this build -->
+    <property environment="env"/>
+    <property name="app-name" location="misc1"/>
+    <property name="src" location="./src"/>
+    <property name="app-src" location="../src"/>
+    <property name="resources" location="./resources"/>
+
+    <property name="classes" location="./classes"/>
+    <property name="app-resources" location="../resources"/>
+    <property name="lib" location="../lib"/>
+    <property name="build" location="../build"/>
+    <property name="test-lib" location="./lib"/>
+
+    <!-- if under a webapp directory in a java servlet container -->
+    <property name="deployed-classes" location="../WEB-INF/classes"/>
+    <property name="deployed-app-resources" location="../WEB-INF/classes"/>
+    <property name="deployed-lib" location="../WEB-INF/lib"/>
+    <property name="deployed-schema" location="../../database/schema"/>
+
+    <property name="reports" location="./reports"/>
+    <property name="exports" location="./exports"/>
+
+    <presetdef name="javac">
+        <javac includeantruntime="false" />
+    </presetdef>
+
+    <!-- umm - is junit available - duh -->
+    <target name="junit">
+        <available property="junit.present" classname="junit.framework.TestCase"/>
+    </target>
+
+    <target name="init" depends="">
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${reports}"/>
+        <mkdir dir="${exports}"/>
+    </target>
+
+    <path id="build.class.path">
+        <pathelement path="${resources}"/>
+        <!--<pathelement path="${app-resources}"/>--><!-- since app resources are put into jar anyways -->
+        <pathelement path="${classes}"/>
+        <fileset dir="${build}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${test-lib}">
+            <include name="**/*.jar"/>
+            <exclude name="**/findbugs/lib/ant.jar"/>
+        </fileset>
+
+        <!-- TODO need to incorporate JTidy - HTML correctness checks -->
+        <!--<pathelement location="${test-lib}/jtidy-r938.jar"/>-->
+        <!-- TODO need to incorporate FindBugs - static bug detector -->
+        <!--<pathelement location="${test-lib}/findbugs/lib/findbugs-ant.jar"/>-->
+    </path>
+
+    <path id="deployed.class.path">
+        <pathelement path="${resources}"/>
+        <pathelement path="${deployed-app-resources}"/>
+        <pathelement path="${deployed-classes}"/>
+        <fileset dir="${deployed-lib}">
+            <include name="*.jar"/>
+            <include name="*.zip"/>
+        </fileset>
+        <pathelement path="${java.class.path}"/>
+    </path>
+
+    <!-- key/main/primary targets -->
+    <target name="default" depends="clean,init,compile,package"/>
+    <target name="buildall" depends="clean,init,compile,package"/>
+    <target name="compile" depends="init" description="Compile all java test files">
+        <echo message="Compiling files, java version ${ant.java.version}"/>
+        <property name="classpathString" refid="build.class.path" />
+        <echo message="Classpath is ${classpathString}" />
+        <javac srcdir="${src}" destdir="${classes}" fork="true" memoryInitialSize="256m" memoryMaximumSize="256m"
+               classpathref="build.class.path" debug="true">
+        </javac>
+    </target>
+
+    <target name="package" depends="init, compile" description="package classes">
+        <jar jarfile="${build}/ari-vizhtml-test.jar" basedir="${classes}">
+            <include name="**/com/ariscience/**"/>
+        </jar>
+    </target>
+
+    <target name="switchToInMemoryDB" description="If H2 db is setup for tests, switch to in memory DB">
+        <!--
+        <copy file="${app-resources}/hibernate.cfg.xml" todir="${resources}/"/>
+        <replace file="${resources}/hibernate.cfg.xml">
+            <replacefilter>
+                <replacetoken>jdbc:h2:/Users/private/work/db/h2/ari_core_dev;FILE_LOCK=SOCKET</replacetoken>
+                <replacevalue>jdbc:h2:mem:ari_test</replacevalue>
+            </replacefilter>
+        </replace>
+        -->
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${classes}"/>
+        <delete file="${build}/ari_core_test.jar"/>
+        <delete dir="${reports}"/>
+        <delete dir="${exports}"/>
+    </target>
+
+    <target name="runTest" depends="default,switchToInMemoryDB">
+        <description description="Runs a single unit test. Class name of unit test expectd as JVM property e.g. -Dtest=FooTest"/>
+        <fail message="-Dtest=FooTest like parameter not specified">
+            <condition>
+                <or>
+                    <equals arg1="${test}" arg2=""/>
+                    <not>
+                        <isset property="test"/>
+                    </not>
+                </or>
+            </condition>
+        </fail>
+        <junit printsummary="yes" fork="yes" haltonfailure="yes" showoutput="true">
+            <!-- consider enabling following if fork is marked as yes above -->
+            <jvmarg value="-Xms256m"/>
+            <jvmarg value="-Xmx4096m"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+
+            <classpath refid="build.class.path"/>
+            <formatter type="plain"/>
+
+            <batchtest fork="yes" todir="${reports}">
+                <fileset dir="${src}">
+                    <include name="**/${test}.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="runTests" depends="default,switchToInMemoryDB">
+        <property name="classpathString" refid="build.class.path" />
+        <echo message="Note: Does not run User Interface, Integration, or ADA/508/Accessbility Tests"/>
+        <echo message="Classpath is ${classpathString}" />
+        <!-- carefully consider whether forkmode="once" is right as new tests are added. Other options are "perTest" or "perBatch" -->
+        <junit printsummary="yes" fork="yes" haltonfailure="yes" forkmode="once">
+            <!-- consider enabling following if fork is marked as yes above -->
+            <jvmarg value="-Xms256m"/>
+            <jvmarg value="-Xmx4096m"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <classpath>
+                <path refid="build.class.path"/>
+            </classpath>
+            <!--
+            type="xml" taken out as underlying hostname logging was taking too long around 5000ms
+            root cause addressed by making entry to /etc/hosts in unix like systems
+            https://thoeni.io/post/macos-sierra-java/
+            -->
+            <formatter type="xml"/>
+
+            <!-- if there's one test file where we want detail information - e.g. during debugging -->
+            <!--
+            <test name="my.test.TestCase" haltonfailure="no" outfile="${reports}/detail">
+                <formatter type="xml"/>
+            </test>
+            -->
+
+            <!-- first batch are tests that run fast -->
+            <batchtest todir="${reports}">
+                <fileset dir="${src}">
+                    <include name="**/*Test.java"/>
+                    <!-- Exclude specific tests if needed -->
+                    <exclude name="**/Aligner*Test.java"/>
+                    <exclude name="**/SubstanceMemoryTest.java"/>
+                </fileset>
+            </batchtest>
+            <!-- second batch are tests that run slow -->
+            <batchtest todir="${reports}">
+                <fileset dir="${src}">
+                    <include name="**/Aligner*Test.java"/>
+                    <include name="**/SubstanceMemoryTest.java"/>
+                    <!-- Exclude specific tests if needed -->
+                    <exclude name="**/FooTest1.java"/>
+                    <exclude name="**/FooTest2.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        <antcall target="echotime"/>
+        <antcall target="pushReports"/>
+    </target>
+
+    <target name="echotime">
+        <tstamp>
+            <format property="LOCAL_TIME" pattern="yyyy-MM-dd HH:mm:ss:sss zzz"/>
+        </tstamp>
+        <echo>Time is ${LOCAL_TIME}</echo>
+    </target>
+
+    <target name="pushReports">
+        <tstamp>
+            <format property="LOCAL_TIME" pattern="yyyy-MM-dd HH:mm:ss:sss zzz"/>
+        </tstamp>
+        <tstamp>
+            <format property="COMPILED_FILE_PREFIX" pattern="yyyyMMddHHmmss-"/>
+        </tstamp>
+        <!-- support for Windows -->
+        <condition property="number-cores" value="${env.NUMBER_OF_PROCESSORS}">
+            <os family="windows" />
+        </condition>
+        <!-- support for Linux and Solaris (package SUNWgnu-coreutils is required) -->
+        <exec executable="nproc" outputproperty="number-cores" os="Linux,SunOS,Solaris">
+            <arg value="--all"/>
+        </exec>
+        <!-- support for Mac OS X -->
+        <exec executable="sysctl" outputproperty="number-cores" os="Mac OS X">
+            <arg value="-n"/>
+            <arg value="hw.ncpu"/>
+        </exec>
+        <echo message="Number of cores: ${number-cores}"/>
+        <concat destfile="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml"><![CDATA[<compiled time="${LOCAL_TIME}" cores="${number-cores}">]]></concat>
+        <concat destfile="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml" append="true">
+            <fileset dir="${reports}" includes="TEST*.xml"/>
+        </concat>
+        <concat destfile="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml" append="true"><![CDATA[</compiled>]]></concat>
+        <replace dir="${reports}" value="">
+            <include name="${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml"/>
+            <replacetoken><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>]]></replacetoken>
+        </replace>
+        <!-- remove the properties -->
+        <replaceregexp file="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml" flags="g"
+                       match="\&lt;property name.*\/&gt;"
+                       replace=""
+                       byline="true"/>
+        <!-- remove hostname for privacy reasons -->
+        <replaceregexp file="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml" flags="g"
+                       match="hostname.*\d\&quot;"
+                       replace=""/>
+        <!-- remove the spurious new line characters -->
+        <replaceregexp file="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml" flags="g"
+                       match="\s*\n\s*\n"
+                       replace=""
+                       byline="false"/>
+        <scp description="to push successful reports to server location for reporting later on"
+             passphrase="amal456P!"
+             keyfile="~/work/local_pems/bluehost_ariscience.org/ftppush1.private"
+             file="${reports}/${COMPILED_FILE_PREFIX}ari_vizhtml_compiled.xml"
+             todir="ariscien@ariscience.org:~/public_html/devops/"/>
+    </target>
+
+    <target name="runSampleTest">
+        <junit dir="." printsummary="yes" fork="yes" haltonfailure="yes">
+            <jvmarg value="-Xmx1024m"/>
+            <jvmarg value="-Xms64m"/>
+            <classpath refid="build.class.path"/>
+            <formatter type="plain"/>
+            <batchtest fork="yes" todir="${reports}">
+                <fileset dir="${src}">
+                    <include name="**/*SampleTest*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+
+    <!-- Specific java targets -->
+    <target name="visualizeXYZ" depends="">
+        <java classname="com.ariscience.XYZ" fork="true"
+              maxmemory="2048m" failonerror="true">
+            <classpath refid="build.class.path"/>
+        </java>
+    </target>
+
+
+</project>

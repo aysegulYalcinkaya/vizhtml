@@ -1,0 +1,28 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+<script>
+  var xArray = $DATAX$;
+  var yArray = $DATAY$;
+  var zArray = $DATAZ$;
+  var txtArray = $INFO$;
+  var layout = {title:'$TITLE_CHART$',
+    width:$WIDTH$,
+    height:$HEIGHT$};
+
+  var data = [{
+      z:zArray,
+      x:xArray,
+      y:yArray,
+      text:txtArray,
+      hovertemplate:"X: %{x} Y: %{y} Z: %{z}<br>%{text}<extra></extra>",
+      type:"heatmap"}];
+
+  Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

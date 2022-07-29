@@ -1,0 +1,49 @@
+<html>
+<script src="https://cdn.plot.ly/plotly-1.58.5.min.js"></script>
+<body>
+
+<div id="myPlot"></div>
+<footer align="center" style="width: $WIDTH$px;"><sub>$FOOTNOTE$</sub></footer>
+<script>
+    var x=$DATAX$;
+    var y=$DATAY$;
+    var z=$DATAZ$;
+    var txtArray = $INFO$;
+    var color=['rgb(142,182,227)','rgb(236,116,116)','rgb(140,241,241)','rgb(136,246,159)','rgb(246,237,136)'];
+
+    var data=[];
+    for (i=0;i<x.length;i++){
+        data.push( {
+            x: x[i], y: y[i], z: z[i],
+            mode: 'markers',
+            marker: {
+                color: color[i%5],
+                size: 12,
+                symbol: 'circle',
+                line: {
+                    color: 'rgb(204, 204, 204)',
+                    width: 1
+                },
+                opacity: 0.8
+            },
+            type: 'scatter3d',
+            text : txtArray[i],
+            hovertemplate : "x: %{x}<br>y: %{y}<br>z: %{z}<br>%{text}<extra></extra>"
+        });
+    }
+    // Define Layout
+    var layout = {
+        xaxis: {title: '$TITLE_X$'},
+        yaxis: {title: '$TITLE_Y$'},
+        zaxis: {title: '$TITLE_Z$'},
+        title: '$TITLE_CHART$',
+        width: $WIDTH$,
+        height: $HEIGHT$
+    };
+
+    // Display using Plotly
+    Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>

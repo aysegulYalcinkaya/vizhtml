@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>Google Charts Tutorial</title>
+    <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+    <script type = "text/javascript">
+        google.charts.load('current', {packages: ['corechart','line']});
+    </script>
+</head>
+
+<body>
+<div id = "container">
+</div>
+<footer align="center" style="width: 900px;"><sub>Footnote-1</sub></footer>
+<script language = "JavaScript">
+    function drawChart() {
+        // Define the chart to be drawn.
+        var data = new google.visualization.DataTable();
+
+        data.addColumn('string', 'X');
+        data.addColumn('number', 'Tokyo');
+data.addColumn({type:'string',role:'tooltip'});
+data.addColumn('number', 'New York');
+data.addColumn({type:'string',role:'tooltip'});
+data.addColumn('number', 'Berlin');
+data.addColumn({type:'string',role:'tooltip'});
+
+        data.addRows([
+            ['Jan',7.0,'Jan\nTokyo : 7.0',-0.2,'Jan\nNew York : -0.2\nTest Data Value',-0.9,'Jan\nBerlin : -0.9'],['Feb',6.9,'Feb\nTokyo : 6.9',0.8,'Feb\nNew York : 0.8',0.6,'Feb\nBerlin : 0.6'],['Mar',9.5,'Mar\nTokyo : 9.5\nMax value',5.7,'Mar\nNew York : 5.7',3.5,'Mar\nBerlin : 3.5'],['Apr',2.2,'Apr\nTokyo : 2.2\nMin value',1.1,'Apr\nNew York : 1.1',5.2,'Apr\nBerlin : 5.2']
+        ]);
+
+        // Set chart options
+        var options = {
+            chart: {
+                title: 'Chart',
+                subtitle: ''
+            },
+            hAxis: {
+                title: 'X',
+            },
+            vAxis: {
+                title: 'Y',
+            },
+            width:900,
+            height:500
+        };
+
+        // Instantiate and draw the chart.
+        var chart = new google.visualization.LineChart(document.getElementById('container'));
+        chart.draw(data, options);
+    }
+    google.charts.setOnLoadCallback(drawChart);
+</script>
+</body>
+</html>
