@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<project name="misc1 [trunk]" default="default" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property name="project.name" value="vizhtml" />
+    
+    <description>${project.name} Development</description>
+
+    <!-- set DSTAMP, TSTAMP, and TODAY properties -->
+    <tstamp/>
+
+    <!-- manifest ari biotd version - must match Version.java -->
+    <property name="mf_version" value="0.0.1" />
+    <property name="mf_vendor" value="Alamgir Research Inc." />
+    <property name="mf_ip" value="(c) 2017-2021 Alamgir Research Inc. All Rights Reserved. Proprietary and Confidential." />
+    <property name="mf_license_1" value="No license or rights whatsoever is granted to any party to use, modify, or configure this software without specific signed and written authorization by an authorized representative of Alamgir Research Inc." />
+    <property name="mf_license_2" value="Employees or contractors of Alamgir Research Inc. may use this library only for authorized official purposes and projects of Alamgir Research Inc." />
+    <property name="ivy.pom.version" value="${mf_version}"/>
+    <property name="ivy.pom.license" value="&lt;!-- &#xD; ${mf_license_1} &#xD; ${mf_license_2} &#xD;--&gt;"/>
+    <property name="ivy.pom.description" value="ARI VizHTML library (ARI = Alamgir Research Inc.)"/>
+    <property name="ivy.report.output.pattern" value="report_ivy_${project.name}.html"/>
+
+    <property name="build.version.filename" value="build.${project.name}.version"/>
+
+    <!-- global properties -->
+    <property environment="env" />
+
+    <!--Load machine specific build configuration-->
+    <property file="build.properties"/>
+
+    <!-- Java version dependency -->
+    <property name="java-source-version" value="1.8" />
+    <property name="java-target-version" value="1.8" />
+
+    <property name="src" location="./src" />
+    <property name="resources" location="./resources" />
+    <property name="build" location="./build" />
+    <property name="classes" location="${build}/classes" />
+    <property name="lib" location="./lib" />
+    <property name="schema" location="../database/schema" />
+    <property name="j2ee" location="./web/WEB-INF" />
+
+    <!-- if there are any generated files -->
+    <property name="generated" location="${build}/gen" />
+    <property name="gen-java" location="${generated}/java" />
+    <property name="gen-classes" location="${generated}/classes" />
+
+    <!-- Test locations -->
+    <property name="test" location="./test" />
+    <property name="reports" location="${test}/reports" />
+
+    <!-- future checkstyle integration -->
+    <property name="checkstyle" location="${test}/lib/checkstyle" />
+
+    <!-- JavaDoc -->
+    <property name="jdoc" location="./javadoc" />
+
+    <presetdef name="javac">
+        <javac includeantruntime="false" />
+    </presetdef>
+
+    <path id="build.class.path">
+        <pathelement path="${resources}" />
+        <pathelement path="${classes}" />
+        <!-- placeholder in case we have generated xml accessors in the future -->
+        <!--
+        <fileset dir="${build}">
+            <include name="ari-biotd-xmlaccessor.jar" />
+        </fileset>
+        -->
+        <fileset dir="${lib}">
+            <include name="**/*.jar" />
+        </fileset>
+        <pathelement path="${java.class.path}" />
+    </path>
+
+    <!-- Define primary targets -->
+    <target name="default" depends="compile,package" />
+    <target name="buildall" depends="clean,init,compile,package,dependencyAnalyzer"/>
+
+    <target name="init">
+        <mkdir dir="${build}" />
+        <mkdir dir="${classes}" />
+    </target>
+
+    <target name="clean" description="clean up">
+        <mkdir dir="${build}" />
+        <delete includeemptydirs="true">
+            <fileset dir="${build}" includes="**/*"/>
+        </delete>
+    </target>
+
+    <target name="buildversion" depends="init" description="write the build version file">
+        <tstamp>
+            <format property="build-timestamp" pattern="yyyyMMddHHmmss" />
+        </tstamp>
+        <condition property="isLinux">
+            <os family="unix" arch="i386"/>
+        </condition>
+        <condition property="isWindows">
+            <os family="windows"/>
+        </condition>
+        <condition property="isMac">
+            <os family="mac"/>
+        </condition>
+        <condition property="isSolaris">
+            <os name="SunOS" arch="sparc"/>
+        </condition>
+        <condition property="isSolarisX86" >
+            <os name="SunOS" arch="x86" />
+        </condition>
+        <condition property="buildPlatform" value="Linux">
+            <os family="unix" arch="i386"/>
+        </condition>
+        <condition property="buildPlatform" value="Windows">
+            <os family="windows"/>
+        </condition>
+        <condition property="buildPlatform" value="Mac">
+            <os family="mac"/>
+        </condition>
+        <condition property="buildPlatform" value="Solaris">
+            <os name="SunOS" arch="sparc"/>
+        </condition>
+        <condition property="buildPlatform" value="SolarisX86">
+            <os name="SunOS" arch="x86"/>
+        </condition>
+        <echo message="Build platform: ${buildPlatform}"/>
+        <echo file="${classes}/${build.version.filename}" append="false" message="Build timestamp: ${build-timestamp}${line.separator}" />
+        <echo file="${classes}/${build.version.filename}" append="true" message="Build platform: ${buildPlatform}${line.separator}" />
+        <echo file="${classes}/${build.version.filename}" append="true" message="Build JDK: ${java.version}${line.separator}" />
+    </target>
+
+    <target name="compile" depends="init, buildversion" description="Compile all Java files">
+        <echo message="Compiling all Java files" />
+        <javac encoding="UTF-8"  srcdir="${src}" destdir="${classes}" fork="true" memoryInitialSize="128m" memoryMaximumSize="256m" classpathref="build.class.path" debug="true" source="${java-target-version}" target="${java-target-version}" >
+            <!-- turn off debug mode -->
+            <!--
+            <compilerarg value="-g:none"/>
+            -->
+            <!-- Terminates compilation when warnings occur -->
+            <!--
+            <compilerarg value="-Werror"/>
+            -->
+            <!-- show all warnins -->
+            <!--
+            <compilerarg value="-Xlint:all"/>
+            -->
+            <!--
+            <compilerarg value="-werror"/>
+            <compilerarg value="-Xlint:unchecked"/>
+            -->
+        </javac>
+    </target>
+
+    <target name="package" depends="compile" description="Package Java classes">
+        <jar jarfile="${build}/${project.name}-${mf_version}.jar" basedir="${classes}">
+            <include name="**/**"/>
+            <manifest>
+                <attribute name="Built-By" value="${mf_vendor}"/>
+                <attribute name="Implementation-Version" value="${mf_version} ${TODAY} ${TSTAMP}"/>
+                <attribute name="Implementation-Vendor" value="${mf_vendor}"/>
+                <attribute name="Intellectual-Property" value="${mf_ip}"/>
+                <attribute name="License-Statement-1" value="${mf_license_1}"/>
+                <attribute name="License-Statement-2" value="${mf_license_2}"/>
+            </manifest>
+        </jar>
+        <copy todir="${build}/resources">
+            <fileset dir="${resources}">
+                <include name="**/*.*" />
+            </fileset>
+        </copy>
+        <jar jarfile="${build}/${project.name}-resources-${mf_version}.jar" basedir="${build}/resources">
+            <include name="**/**"/>
+            <manifest>
+                <attribute name="Built-By" value="${mf_vendor}"/>
+                <attribute name="Implementation-Version" value="${mf_version} ${TODAY} ${TSTAMP}"/>
+                <attribute name="Implementation-Vendor" value="${mf_vendor}"/>
+                <attribute name="Intellectual-Property" value="${mf_ip}"/>
+                <attribute name="License-Statement-1" value="${mf_license_1}"/>
+                <attribute name="License-Statement-2" value="${mf_license_2}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="package-source" depends="package" description="package src jar">
+        <jar jarfile="${build}/ari_${project.name}_src_${mf_version}.jar" basedir="${src}">
+            <include name="**/*.java" />
+            <manifest>
+                <attribute name="Built-By" value="${mf_vendor}"/>
+                <attribute name="Implementation-Version" value="${mf_version} ${TODAY} ${TSTAMP}"/>
+                <attribute name="Implementation-Vendor" value="${mf_vendor}"/>
+                <attribute name="Intellectual-Property" value="${mf_ip}"/>
+                <attribute name="License-Statement-1" value="${mf_license_1}"/>
+                <attribute name="License-Statement-2" value="${mf_license_2}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="javadocPrivate" description="creates private javadoc">
+        <delete dir="${jdoc}" />
+        <javadoc destdir="${jdoc}" Author="true" version="true" Use="true" noindex="false" maxmemory="512m" access="private" Windowtitle="API" bottom="Copyright 2017-2021 Alamgir Research Inc. All rights reserved." footer="Alamgir Research Inc use only">
+            <classpath refid="build.class.path" />
+            <fileset dir="${src}">
+                <include name="**/*.java" />
+            </fileset>
+            <doctitle>${project.name} Suite</doctitle>
+            <bottom>Copyright 2017-2021 Alamgir Research Inc. All rights reserved. Proprietary and Confidential.</bottom>
+        </javadoc>
+    </target>
+
+    <!-- show classpath and java version -->
+    <target name="showClasspath" description="display classpath and java version">
+        <property name="cp" refid="build.class.path" />
+        <echo message="Classpath is ${cp}" />
+        <echo message="Default Java Version ${ant.java.version}" />
+    </target>
+
+    <target name="getLibraries" description="Perform Apache Ivy Related Tasks">
+        <ivy:retrieve/>                 <!-- retrieve external dependencies with Ivy -->
+        <ivy:report graph="false" module="${project.name}"/>    <!-- generate dependency report -->
+        <!-- fix the css reference and wipe out computer name -->
+        <echo message="Position A"/>
+        <replace file="report_ivy_${project.name}.html" token="working@computer0.local" value=" "/>
+        <echo message="Position B"/>
+        <replace file="report_ivy_${project.name}.html" token="ivy-report.css" value="report_ivy.css"/>
+        <move file="ivy-report.css" tofile="report_ivy.css" verbose="true"/>
+    </target>
+
+    <!-- test for example FX application -->
+    <target name="startSampleFX" description="start Jmol" >
+        <echo message="Java Version is ${ant.java.version}" />
+        <echo message="starting sample FX app"/>
+        <java classname="com.ariscience.sample.Simple3DRendererUsingJavaFX" fork="true" maxmemory="256m" failonerror="true">
+            <classpath refid="build.class.path" />
+        </java>
+    </target>
+
+    <!-- dependency analyzer -->
+    <target name="dependencyAnalyzer" description="analyzes jar dependencies" depends="dependencyAnalyzerInternal, dependencyAnalyzerOverall">
+
+    </target>
+
+    <!-- dependency analyzer external -->
+    <target name="dependencyAnalyzerOverall" description="analyzes jar dependencies" >
+        <exec executable="jdeps" output="report_dependencyOverall.txt">
+            <!--<arg value="-summary"/>-->
+            <!--<arg value="-profile"/>-->
+            <!-- https://stackoverflow.com/questions/1687620/regex-match-everything-but -->
+            <arg value="-e"/>
+            <arg value="^(?!java).*$"/> <!-- filter out core java jars -->
+            <arg value="-cp"/>
+            <arg pathref="build.class.path"/>
+            <arg value="-R"/>
+            <arg value="${build}/${project.name}-${mf_version}.jar"/>
+        </exec>
+        <exec executable="jdeps">
+            <arg value="-e"/>
+            <arg value="^(?!java).*$"/> <!-- filter out core java jars -->
+            <arg value="-dotoutput"/>
+            <arg value="dot"/>
+            <arg value="-cp"/>
+            <arg pathref="build.class.path"/>
+            <arg value="-R"/>
+            <arg value="${build}/${project.name}-${mf_version}.jar"/>
+        </exec>
+        <move file="dot/summary.dot" tofile="report_dependencyOverall.dot" verbose="true"/>
+        <delete dir="dot"/>
+    </target>
+
+    <!-- dependency analyzer internal -->
+    <target name="dependencyAnalyzerInternal" description="analyzes jar dependencies" >
+        <exec executable="jdeps" output="report_dependencyIntraPackage.txt">
+            <arg value="-filter:none"/>
+            <arg value="-verbose:class"/>
+            <arg value="-e"/>
+            <arg value="^(?!(java|org)).*$"/> <!-- filter out core java jars or open source jars -->
+            <arg value="-cp"/>
+            <arg pathref="build.class.path"/>
+            <arg value="${build}/${project.name}-${mf_version}.jar"/>
+        </exec>
+        <exec executable="jdeps">
+            <arg value="-filter:none"/>
+            <arg value="-verbose:class"/>
+            <arg value="-e"/>
+            <arg value="^(?!(java|org)).*$"/> <!-- filter out core java jars or open source jars -->
+            <arg value="-dotoutput"/>
+            <arg value="dot"/>
+            <arg value="-cp"/>
+            <arg pathref="build.class.path"/>
+            <arg value="${build}/${project.name}-${mf_version}.jar"/>
+        </exec>
+        <move file="dot/${project.name}-${mf_version}.jar.dot" tofile="report_dependencyIntraPackage.dot" verbose="true"/>
+        <delete dir="dot"/>
+    </target>
+
+</project>
